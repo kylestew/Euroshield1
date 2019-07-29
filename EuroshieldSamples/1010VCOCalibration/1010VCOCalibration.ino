@@ -54,14 +54,14 @@ void loop()
   {
     float peakValue1 = peak1.read();
     // Uncomment this line for IN1 calibration
-    Serial.println(peakValue1, 4);
+//    Serial.println(peakValue1, 4);
   }
 
   if (peak2.available())
   {
     float peakValue2 = peak2.read();
     // Uncomment this line for IN2 calibration
-//    Serial.println(peakValue2, 4);
+    Serial.println(peakValue2, 4);
   }
 
   delay(2);

@@ -29,10 +29,10 @@ AudioControlSGTL5000     sgtl5000_1;     //xy=246,330
 // GUItool: end automatically generated code
 
 // Use the 1010VCOCalibration sketch to learn how these values were measured
-#define kPeakValue1V_IN1   0.2088
-#define kPeakValue4V_IN1   0.7627
-#define kPeakValue1V_IN2   0.2092
-#define kPeakValue4V_IN2   0.7649
+#define kPeakValue1V_IN1   0.223
+#define kPeakValue4V_IN1   0.7758
+#define kPeakValue1V_IN2   0.218
+#define kPeakValue4V_IN2   0.771
 #define kC1VFrequency      32.703 
 
 void setup()
