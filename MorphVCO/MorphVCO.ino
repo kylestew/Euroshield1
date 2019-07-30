@@ -19,7 +19,7 @@ AudioConnection         patchCord0(in, 0, vOctCV, 0);
 AudioConnection         patchCord1(in, 1, shapeCV, 0);
 
 AudioConnection         patchCord2(core, 0, out, 0);
-//AudioConnection         patchCord2(faust, 1, out, 1);
+AudioConnection         patchCord3(core, 1, out, 1);
 
 AudioControlSGTL5000    codec;
 
@@ -41,13 +41,13 @@ const int LED0_PIN = 3; // LEDs on pins 3, 4, 5, and 6
 #define kPeakValue4V_IN2   0.771
 #define kC1VFrequency      32.703
 
-int octaveShift = 1;
+int octaveShift = 2;
 int centsOffset = 0;
 
 void setup() {
-    Serial.begin(9600);
+//    Serial.begin(9600);
 
-    AudioMemory(10);
+    AudioMemory(12);
 
     pinMode(OCTAVE_BUTTON, INPUT_PULLUP);
     pinMode(LED0_PIN, OUTPUT);
@@ -57,7 +57,7 @@ void setup() {
 
     codec.enable();
     codec.inputSelect(AUDIO_INPUT_LINEIN);
-    codec.volume(0.82);
+    codec.volume(0.9);
     codec.adcHighPassFilterDisable();
     codec.lineInLevel(0,0);
     codec.unmuteHeadphone();
@@ -75,11 +75,10 @@ float calcFreqFromPeakValueIN1(float peakValue) {
     return calcFreqFromCV(cvValue);
 }
 
-//float calcFreqFromPeakValueIN2(float peakValue) {
-//    float peakPerOctave = (kPeakValue4V_IN2 - kPeakValue1V_IN2) / 3;
-//    float cvValue = (peakValue - kPeakValue1V_IN2) / peakPerOctave;
-//    return calcFreqFromCV(cvValue);
-//}
+float calcCVFromPeakValueIN2(float peakValue) {
+    float peakPerOctave = (kPeakValue4V_IN2 - kPeakValue1V_IN2) / 3;
+    return (peakValue - kPeakValue1V_IN2) / peakPerOctave;
+}
 
 void updateOctaveState() {
     for (int i = 0; i < 4; i++) {
@@ -97,7 +96,7 @@ void loop() {
         }
     }
 
-    // Hold Length
+    // Fine tune
     int freqPot  = analogRead(FREQ_POT);
     centsOffset = map(freqPot, 0, 1024, 0, 200) - 100; // [-100, 100] cents fine tuning
 
@@ -108,16 +107,20 @@ void loop() {
         core.setParamValue("freq", freq);
     }
 
-    /*
+    // Shape
+    int shapePot  = analogRead(SHAPE_POT);
+    float shape = map((float)shapePot, 0, 1024, 0.0, 1.0);
+
     if (shapeCV.available()) {
-        float peakValue2 = shapeCV.read();
-        Serial.println(peakValue2);
-//        waveform2.frequency(calcFreqFromPeakValueIN2(peakValue2));
+        float peak = shapeCV.read();
+        shape += peak;
+
+        shape = min(max(shape, 0), 1);
+        core.setParamValue("wave", shape);
     }
-     */
 
 //    delay(2);
-    delay(12);
+//    delay(20);
 }
 
 

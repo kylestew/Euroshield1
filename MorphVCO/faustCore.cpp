@@ -4569,6 +4569,10 @@ extern usb_midi_class usbMIDI;
 #include <cmath>
 #include <math.h>
 
+static float mydsp_faustpower3_f(float value) {
+	return ((value * value) * value);
+	
+}
 
 #ifndef FAUSTCLASS 
 #define FAUSTCLASS mydsp
@@ -4586,12 +4590,35 @@ class mydsp : public dsp {
 	float fConst0;
 	float fConst1;
 	FAUSTFLOAT fHslider0;
+	FAUSTFLOAT fHslider1;
+	float fVec0[2];
+	int iVec1[3];
+	float fConst2;
+	float fConst3;
 	float fRec0[2];
+	float fVec2[2];
+	float fVec3[2];
+	float fConst4;
+	float fVec4[2];
+	float fRec1[2];
+	float fVec5[2];
+	float fVec6[2];
+	int IOTA;
+	float fVec7[4096];
+	float fConst5;
+	float fRec2[2];
+	float fVec8[2];
+	float fRec3[2];
+	float fVec9[2];
+	float fVec10[2];
+	float fVec11[4096];
 	
  public:
 	
 	void metadata(Meta* m) { 
 		m->declare("filename", "faustCore.dsp");
+		m->declare("filters.lib/name", "Faust Filters Library");
+		m->declare("filters.lib/version", "0.0");
 		m->declare("maths.lib/author", "GRAME");
 		m->declare("maths.lib/copyright", "GRAME");
 		m->declare("maths.lib/license", "LGPL with exception");
@@ -4607,7 +4634,7 @@ class mydsp : public dsp {
 		
 	}
 	virtual int getNumOutputs() {
-		return 1;
+		return 2;
 		
 	}
 	virtual int getInputRate(int channel) {
@@ -4629,6 +4656,10 @@ class mydsp : public dsp {
 				rate = 1;
 				break;
 			}
+			case 1: {
+				rate = 1;
+				break;
+			}
 			default: {
 				rate = -1;
 				break;
@@ -4646,18 +4677,84 @@ class mydsp : public dsp {
 	virtual void instanceConstants(int sample_rate) {
 		fSampleRate = sample_rate;
 		fConst0 = std::min<float>(192000.0f, std::max<float>(1.0f, float(fSampleRate)));
-		fConst1 = (1.0f / fConst0);
+		fConst1 = (0.0500000007f * fConst0);
+		fConst2 = (0.5f * fConst0);
+		fConst3 = (1.0f / fConst0);
+		fConst4 = (0.0833333358f * fConst0);
+		fConst5 = (3.20000005f / fConst0);
 		
 	}
 	
 	virtual void instanceResetUserInterface() {
-		fHslider0 = FAUSTFLOAT(220.0f);
+		fHslider0 = FAUSTFLOAT(0.5f);
+		fHslider1 = FAUSTFLOAT(220.0f);
 		
 	}
 	
 	virtual void instanceClear() {
 		for (int l0 = 0; (l0 < 2); l0 = (l0 + 1)) {
-			fRec0[l0] = 0.0f;
+			fVec0[l0] = 0.0f;
+			
+		}
+		for (int l1 = 0; (l1 < 3); l1 = (l1 + 1)) {
+			iVec1[l1] = 0;
+			
+		}
+		for (int l2 = 0; (l2 < 2); l2 = (l2 + 1)) {
+			fRec0[l2] = 0.0f;
+			
+		}
+		for (int l3 = 0; (l3 < 2); l3 = (l3 + 1)) {
+			fVec2[l3] = 0.0f;
+			
+		}
+		for (int l4 = 0; (l4 < 2); l4 = (l4 + 1)) {
+			fVec3[l4] = 0.0f;
+			
+		}
+		for (int l5 = 0; (l5 < 2); l5 = (l5 + 1)) {
+			fVec4[l5] = 0.0f;
+			
+		}
+		for (int l6 = 0; (l6 < 2); l6 = (l6 + 1)) {
+			fRec1[l6] = 0.0f;
+			
+		}
+		for (int l7 = 0; (l7 < 2); l7 = (l7 + 1)) {
+			fVec5[l7] = 0.0f;
+			
+		}
+		for (int l8 = 0; (l8 < 2); l8 = (l8 + 1)) {
+			fVec6[l8] = 0.0f;
+			
+		}
+		IOTA = 0;
+		for (int l9 = 0; (l9 < 4096); l9 = (l9 + 1)) {
+			fVec7[l9] = 0.0f;
+			
+		}
+		for (int l10 = 0; (l10 < 2); l10 = (l10 + 1)) {
+			fRec2[l10] = 0.0f;
+			
+		}
+		for (int l11 = 0; (l11 < 2); l11 = (l11 + 1)) {
+			fVec8[l11] = 0.0f;
+			
+		}
+		for (int l12 = 0; (l12 < 2); l12 = (l12 + 1)) {
+			fRec3[l12] = 0.0f;
+			
+		}
+		for (int l13 = 0; (l13 < 2); l13 = (l13 + 1)) {
+			fVec9[l13] = 0.0f;
+			
+		}
+		for (int l14 = 0; (l14 < 2); l14 = (l14 + 1)) {
+			fVec10[l14] = 0.0f;
+			
+		}
+		for (int l15 = 0; (l15 < 4096); l15 = (l15 + 1)) {
+			fVec11[l15] = 0.0f;
 			
 		}
 		
@@ -4684,24 +4781,93 @@ class mydsp : public dsp {
 	
 	virtual void buildUserInterface(UI* ui_interface) {
 		ui_interface->openVerticalBox("faustCore");
-		ui_interface->addHorizontalSlider("freq", &fHslider0, 220.0f, 20.0f, 24000.0f, 0.00999999978f);
+		ui_interface->addHorizontalSlider("freq", &fHslider1, 220.0f, 20.0f, 2000.0f, 0.00999999978f);
+		ui_interface->addHorizontalSlider("wave", &fHslider0, 0.5f, 0.0f, 1.0f, 0.00100000005f);
 		ui_interface->closeBox();
 		
 	}
 	
 	virtual void compute(int count, FAUSTFLOAT** inputs, FAUSTFLOAT** outputs) {
 		FAUSTFLOAT* output0 = outputs[0];
-		float fSlow0 = std::max<float>(1.00000001e-07f, std::fabs(float(fHslider0)));
-		float fSlow1 = (fConst1 * fSlow0);
-		float fSlow2 = (1.0f - (fConst0 / fSlow0));
+		FAUSTFLOAT* output1 = outputs[1];
+		float fSlow0 = float(fHslider0);
+		float fSlow1 = float(fHslider1);
+		float fSlow2 = std::max<float>(20.0f, std::fabs(fSlow1));
+		float fSlow3 = (fConst1 * (std::max<float>((1.0f - (2.0f * std::fabs(fSlow0))), 0.0f) / fSlow2));
+		float fSlow4 = (fConst2 / fSlow2);
+		float fSlow5 = (0.600000024f * std::max<float>((1.0f - (2.0f * std::fabs((fSlow0 + -0.5f)))), 0.0f));
+		float fSlow6 = std::max<float>(fSlow1, 23.4489498f);
+		float fSlow7 = std::max<float>(20.0f, std::fabs(fSlow6));
+		float fSlow8 = (fConst4 / fSlow7);
+		float fSlow9 = (fConst2 / fSlow7);
+		float fSlow10 = std::max<float>(0.0f, std::min<float>(2047.0f, (fConst2 / fSlow6)));
+		float fSlow11 = std::floor(fSlow10);
+		float fSlow12 = (fSlow11 + (1.0f - fSlow10));
+		int iSlow13 = int(fSlow10);
+		float fSlow14 = (fSlow10 - fSlow11);
+		int iSlow15 = (iSlow13 + 1);
+		float fSlow16 = (fConst5 * (fSlow1 * std::max<float>((1.0f - (2.0f * std::fabs((fSlow0 + -1.0f)))), 0.0f)));
+		float fSlow17 = std::max<float>((0.5f * fSlow1), 23.4489498f);
+		float fSlow18 = std::max<float>(20.0f, std::fabs(fSlow17));
+		float fSlow19 = (fConst4 / fSlow18);
+		float fSlow20 = (fConst2 / fSlow18);
+		float fSlow21 = std::max<float>(0.0f, std::min<float>(2047.0f, (fConst2 / fSlow17)));
+		float fSlow22 = std::floor(fSlow21);
+		float fSlow23 = (fSlow22 + (1.0f - fSlow21));
+		int iSlow24 = int(fSlow21);
+		float fSlow25 = (fSlow21 - fSlow22);
+		int iSlow26 = (iSlow24 + 1);
 		for (int i = 0; (i < count); i = (i + 1)) {
-			float fTemp0 = (fSlow1 + (fRec0[1] + -1.0f));
-			int iTemp1 = (fTemp0 < 0.0f);
-			float fTemp2 = (fSlow1 + fRec0[1]);
-			fRec0[0] = (iTemp1 ? fTemp2 : fTemp0);
-			float fRec1 = (iTemp1 ? fTemp2 : (fSlow1 + (fRec0[1] + (fSlow2 * fTemp0))));
-			output0[i] = FAUSTFLOAT(((2.0f * fRec1) + -1.0f));
+			fVec0[0] = fSlow2;
+			iVec1[0] = 1;
+			float fTemp0 = float(iVec1[2]);
+			float fTemp1 = (fRec0[1] + (fConst3 * fVec0[1]));
+			fRec0[0] = (fTemp1 - std::floor(fTemp1));
+			float fTemp2 = (2.0f * fRec0[0]);
+			float fTemp3 = mydsp_faustpower3_f((fTemp2 + -1.0f));
+			fVec2[0] = (fTemp3 + (1.0f - fTemp2));
+			float fTemp4 = (fSlow4 * (fTemp3 + (1.0f - (fTemp2 + fVec2[1]))));
+			fVec3[0] = fTemp4;
+			fVec4[0] = fSlow7;
+			float fTemp5 = ((fConst3 * fVec4[1]) + fRec1[1]);
+			fRec1[0] = (fTemp5 - std::floor(fTemp5));
+			float fTemp6 = (2.0f * fRec1[0]);
+			float fTemp7 = mydsp_faustpower3_f((fTemp6 + -1.0f));
+			fVec5[0] = (fTemp7 + (1.0f - fTemp6));
+			float fTemp8 = (fSlow9 * (fTemp7 + (1.0f - (fTemp6 + fVec5[1]))));
+			fVec6[0] = fTemp8;
+			float fTemp9 = (fSlow8 * (fTemp0 * (fTemp8 - fVec6[1])));
+			fVec7[(IOTA & 4095)] = fTemp9;
+			float fTemp10 = ((fSlow12 * fVec7[((IOTA - iSlow13) & 4095)]) + (fSlow14 * fVec7[((IOTA - iSlow15) & 4095)]));
+			fRec2[0] = ((fTemp9 + (0.999000013f * fRec2[1])) - fTemp10);
+			output0[i] = FAUSTFLOAT((((fSlow3 * (fTemp0 * (fTemp4 - fVec3[1]))) + (fSlow5 * (fTemp9 - fTemp10))) + (fSlow16 * fRec2[0])));
+			fVec8[0] = fSlow18;
+			float fTemp11 = ((fConst3 * fVec8[1]) + fRec3[1]);
+			fRec3[0] = (fTemp11 - std::floor(fTemp11));
+			float fTemp12 = (2.0f * fRec3[0]);
+			float fTemp13 = mydsp_faustpower3_f((fTemp12 + -1.0f));
+			fVec9[0] = (fTemp13 + (1.0f - fTemp12));
+			float fTemp14 = (fSlow20 * (fTemp13 + (1.0f - (fTemp12 + fVec9[1]))));
+			fVec10[0] = fTemp14;
+			float fTemp15 = (fSlow19 * (fTemp0 * (fTemp14 - fVec10[1])));
+			fVec11[(IOTA & 4095)] = fTemp15;
+			output1[i] = FAUSTFLOAT((0.600000024f * (fTemp15 - ((fSlow23 * fVec11[((IOTA - iSlow24) & 4095)]) + (fSlow25 * fVec11[((IOTA - iSlow26) & 4095)])))));
+			fVec0[1] = fVec0[0];
+			iVec1[2] = iVec1[1];
+			iVec1[1] = iVec1[0];
 			fRec0[1] = fRec0[0];
+			fVec2[1] = fVec2[0];
+			fVec3[1] = fVec3[0];
+			fVec4[1] = fVec4[0];
+			fRec1[1] = fRec1[0];
+			fVec5[1] = fVec5[0];
+			fVec6[1] = fVec6[0];
+			IOTA = (IOTA + 1);
+			fRec2[1] = fRec2[0];
+			fVec8[1] = fVec8[0];
+			fRec3[1] = fRec3[0];
+			fVec9[1] = fVec9[0];
+			fVec10[1] = fVec10[0];
 			
 		}
 		
